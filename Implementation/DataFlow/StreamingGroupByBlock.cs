@@ -66,7 +66,8 @@ namespace CounterpointCollective.DataFlow
                 {
                     if (currentGroup.Count > 0)
                     {
-                        outputBlock.PostAsserted(currentGroup.ToArray().ToSingleGroupingWithKey(currentKey));
+                        var g = new Grouping(currentKey, currentGroup);
+                        outputBlock.PostAsserted(g);
                         currentGroup.Clear();
                     }
                     outputBlock.Complete();
