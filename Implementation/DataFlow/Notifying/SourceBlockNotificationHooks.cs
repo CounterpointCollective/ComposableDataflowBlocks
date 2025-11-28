@@ -1,3 +1,4 @@
+using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,7 +73,7 @@ namespace CounterpointCollective.DataFlow.Notifying
 
         public static void DispatchEvents<T>(this SourceBlockNotificationHooks<T> hooks, IEnumerable<SourceBlockEvent> events)
         {
-            foreach (var evs in events.StreamingGroupBy(e => e.GetType()))
+            foreach (var evs in events.GroupAdjacent(e => e.GetType()))
             {
                 if (evs.Key == typeof(DeliveringMessagesEvent))
                 {
