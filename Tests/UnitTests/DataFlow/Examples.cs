@@ -68,7 +68,7 @@ namespace UnitTests.DataFlow
             async Task<IEnumerable<int>> ProcessBatch(int[] batch)
             {
                 var distanceFromOptimal = Math.Abs(batch.Length - 100);
-                await Task.Delay(distanceFromOptimal * batch.Length); // Simulate slower processing when batch isn't optimal
+                await Task.Delay(distanceFromOptimal * batch.Length / 10); // Simulate slower processing when batch isn't optimal
                 return batch;
             }
 
@@ -84,7 +84,7 @@ namespace UnitTests.DataFlow
 
             // Or automatically optimized using AutoScaling:
             testSubject.EnableAutoScaling(
-                new DefaultBatchSizeStrategy(minBatchSize: 1, maxBatchSize: 200)
+                new DefaultBatchSizeStrategy(minBatchSize: 1, maxBatchSize: 200, initialBatchSize: 5)
             );
 
             // Send some work:
@@ -92,6 +92,7 @@ namespace UnitTests.DataFlow
             {
                 await testSubject.SendAsync(i);
             }
+            testSubject.Complete();
 
             // Process outputs while AutoScaling gradually converges toward the optimal batch size (~100).
             for (var i = 0; i < 10000; i++)

@@ -64,15 +64,15 @@ namespace CounterpointCollective.DataFlow
         public double DeltaThroughputPerDeltaBatch =>
             DeltaBatch == 0 ? 0 : DeltaThroughput / DeltaBatch;
 #pragma warning disable CA1822 // Mark members as static
-        public double LearningFactor => 0.01;
+        public double LearningFactor => 1;
 #pragma warning restore CA1822 // Mark members as static
 
         public double ScaledAdjustment => LearningFactor * DeltaThroughputPerDeltaBatch * AllowedBatchSizeRange;
 
         public double S1Calculated { get; set; }
-        public double S2Allowed { get; set; }
-        public double S3FromLowPass { get; set; }
-        public int S4Clamped => (int)Math.Clamp(S3FromLowPass, MinBatchSize, MaxBatchSize);
+        public double S2SetPoint { get; set; }
+        public double S3DampenedSetPoint { get; set; }
+        public double S4Clamped => Math.Clamp(S3DampenedSetPoint, MinBatchSize, MaxBatchSize);
         public double? S5EnsureChangedBatchSize { get; set; }
         public IEnumerable<double> LowPassBuffer { get; set; } = [];
         public int NewBatchSize { get; set; }
@@ -86,7 +86,13 @@ namespace CounterpointCollective.DataFlow
         public object DebugView { get; }
     }
 
-    public class DefaultBatchSizeStrategy(int minBatchSize = 1, int maxBatchSize = 50, int initialBatchSize = 50, int maxQueryTimeSeconds = 60): IBatchSizeStrategy
+    public class DefaultBatchSizeStrategy(
+        int minBatchSize = 1, 
+        int maxBatchSize = 50, 
+        int initialBatchSize = 50,
+        double maxDeltaOfRange = 0.1,
+        int maxQueryTimeSeconds = 60
+    ): IBatchSizeStrategy
     {
         private record BatchStat(int BatchSize, double TotalRunMillis)
         {
@@ -124,22 +130,38 @@ namespace CounterpointCollective.DataFlow
             var newBatchSize =
                 prevBatchStat == null ? currStat.BatchSize : CalculateNextBatchSize(currStat, bsc);
 
-            if (newBatchSize == currStat.BatchSize)
+            if ((int)Math.Round(newBatchSize) == currStat.BatchSize)
             {
                 newBatchSize = EnsureChange(newBatchSize);
                 bsc.S5EnsureChangedBatchSize = newBatchSize;
             }
 
-            bsc.NewBatchSize = newBatchSize;
+            bsc.NewBatchSize = (int) Math.Round(newBatchSize);
             return bsc;
         }
 
-        private int CalculateNextBatchSize(BatchStat currStat, BatchSizeCalculation bsc)
+        private double CalculateNextBatchSize(BatchStat currStat, BatchSizeCalculation bsc)
         {
             bsc.OldBatchSize = prevBatchStat!.BatchSize;
             bsc.DeltaBatch = currStat.BatchSize - prevBatchStat.BatchSize;
             bsc.DeltaThroughput = currStat.Throughput - prevBatchStat.Throughput;
-            var setpoint = currStat.BatchSize + bsc.ScaledAdjustment;
+
+            var betterBatch = currStat.Throughput > prevBatchStat!.Throughput ? currStat.BatchSize : prevBatchStat.BatchSize;
+
+            var setpoint = betterBatch + bsc!.ScaledAdjustment;
+
+            if (Math.Abs(bsc.ScaledAdjustment / bsc.AllowedBatchSizeRange) > maxDeltaOfRange)
+            {
+                if (bsc.ScaledAdjustment > 0)
+                {
+                    setpoint = currStat.BatchSize + (bsc.AllowedBatchSizeRange * maxDeltaOfRange);
+                }
+                else
+                {
+                    setpoint = currStat.BatchSize - (bsc.AllowedBatchSizeRange * maxDeltaOfRange);
+                }
+            }
+
             bsc.S1Calculated = setpoint;
             if (setpoint > maxQueryTimeSeconds * currStat.Throughput)
             {
@@ -151,16 +173,25 @@ namespace CounterpointCollective.DataFlow
                 setpoint = 1;
             }
 
-            bsc.S2Allowed = setpoint;
+            bsc.S2SetPoint = setpoint;
 
+            
+            var newBatchSize = _lowPassFilter.Next(setpoint);
+            int rounded = (int)Math.Round(newBatchSize);
+            if (rounded == currStat.BatchSize)
+            {
+                if (rounded >= currStat.BatchSize)
+                    newBatchSize = currStat.BatchSize + 1;
+                else
+                    newBatchSize = currStat.BatchSize - 1;
+            }
 
-            var newBatchSize = (int)_lowPassFilter.Next(setpoint);
             bsc.LowPassBuffer = _lowPassFilter.GetBuffer();
-            bsc.S3FromLowPass = newBatchSize;
+            bsc.S3DampenedSetPoint = newBatchSize;
             return bsc.S4Clamped;
         }
 
-        private int EnsureChange(int input)
+        private int EnsureChange(double input)
         {
             var larger = (int)Math.Round(input * 1.1) + 1;
             var smaller = (int)Math.Round(input * (1 / 1.1)) - 1;
@@ -175,7 +206,7 @@ namespace CounterpointCollective.DataFlow
             }
             else
 #pragma warning disable CA5394 // Do not use insecure randomness
-            if (_rndm.NextDouble() >= .25)
+            if (_rndm.NextDouble() >= .5)
             {
 #pragma warning disable CA5394 // Do not use insecure randomness
                 return larger;
