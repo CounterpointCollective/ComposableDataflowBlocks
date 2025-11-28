@@ -10,7 +10,7 @@ namespace CounterpointCollective.DataFlow
         private ISourceBlock<O> SourceSide { get; }
         public BoundedPropagatorBlock(
             IPropagatorBlock<I, O> inner,
-            int boundedCapacity,
+            int boundedCapacity = DataflowBlockOptions.Unbounded,
             Action? onEntered = null
         ) : base(inner, boundedCapacity, onEntered) => SourceSide = CreateExit(inner);
 

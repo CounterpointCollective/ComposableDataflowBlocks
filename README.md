@@ -61,7 +61,7 @@ var ourOwnDataflowBlock = DataflowBlock.Encapsulate(b, t);
 
 var testSubject = new BoundedPropagatorBlock<int,int>(ourOwnDataflowBlock, boundedCapacity: 2000);
 
-//Thus we enabled a bounded capacity of 2000 messasges, and realtime counting on our own custom DataflowBlock!
+//Thus we enabled a bounded capacity of 2000 messages, and real-time counting on our own custom DataflowBlock!
 
 Assert.Equal(0, testSubject.Count);
 
@@ -76,13 +76,10 @@ for (var i = 0; i < 2000; i++)
 ### Example 2: Making any DataflowBlock dynamically resizable
 ```csharp
 //Example showing that you can dynamically resize the bounded capacity of any block by wrapping it into a BoundedPropagatorBlock
-
-using CounterpointCollective.DataFlow;
-
 var bufferBlock = new BufferBlock<int>(new() { BoundedCapacity = DataflowBlockOptions.Unbounded });
-var dynamicBufferBlock = new BoundedPropagatorBlock<int,int>(DataflowBlock.Encapsulate(bufferBlock));
+var dynamicBufferBlock = new BoundedPropagatorBlock<int,int>(bufferBlock);
 
-//We did not specify a bounded capacity, so it defaults to DataflowblockOptions.Unbounded
+//We did not specify a bounded capacity, so it defaults to DataflowBlockOptions.Unbounded
 
 Assert.True(dynamicBufferBlock.Post(1));
 
