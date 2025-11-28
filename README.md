@@ -6,9 +6,17 @@ with composability, scalability, and clarity.
 
 ## Purpose
 
-The goal of ComposableDataflowBlocks is to accelerate development of robust data pipelines, workflow engines, and real-time processing 
-applications. By offering ready-to-use, extensible blocks, the library empowers users to define custom data transformations, 
-branching logic, event handling, and more, all while maintaining a clean and maintainable codebase.
+The ComposableDataflowBlocks library exists to make building complex, high-performance data processing pipelines in .NET easier, safer, 
+and more flexible. It extends TPL Dataflow with a set of modular building blocks that solve real-world problems developers frequently face
+but that the base library does not address, such as bounding, dynamic resizing, priority handling, batching, and adaptive throughput 
+control.
+
+By wrapping and enhancing existing blocks (including user-composed ones), the library lets developers add sophisticated behavior without
+rewriting pipelines.
+
+
+In short, the library helps you construct powerful, adaptable, and production-grade Dataflow solutions with minimal friction, while staying 
+fully compatible with the familiar TPL Dataflow model.
 
 ## Features
 
