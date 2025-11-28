@@ -16,7 +16,7 @@
     <!-- Suppress warnings about missing XML documentation -->
     <NoWarn>$(NoWarn);1591</NoWarn>
     <NoWarn>$(NoWarn);1573</NoWarn>
-    <RootNamespace />
+    <RootNamespace>CounterpointCollective</RootNamespace>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,11 +34,11 @@
 
   <ItemGroup>
     <Compile Remove="Collection\**" />
-    <Compile Remove="CounterpointCollective.Utilities\BinaryStore\**" />
+    <Compile Remove="Utilities\BinaryStore\**" />
     <EmbeddedResource Remove="Collection\**" />
-    <EmbeddedResource Remove="CounterpointCollective.Utilities\BinaryStore\**" />
+    <EmbeddedResource Remove="Utilities\BinaryStore\**" />
     <None Remove="Collection\**" />
-    <None Remove="CounterpointCollective.Utilities\BinaryStore\**" />
+    <None Remove="Utilities\BinaryStore\**" />
   </ItemGroup>
 
   <ItemGroup>
