@@ -1,4 +1,5 @@
 ﻿using CounterpointCollective.DataFlow;
+using System.Data;
 using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
@@ -45,19 +46,19 @@ namespace UnitTests.DataFlow
         {
             //Example showing that you can dynamically resize the bounded capacity of any block by wrapping it into a BoundedPropagatorBlock
             var bufferBlock = new BufferBlock<int>(new() { BoundedCapacity = DataflowBlockOptions.Unbounded });
-            var dynamicBufferBlock = new BoundedPropagatorBlock<int, int>(bufferBlock);
+            var resizableBufferBlock = new BoundedPropagatorBlock<int, int>(bufferBlock);
 
             //We did not specify a bounded capacity, so it defaults to DataflowBlockOptions.Unbounded
 
-            Assert.True(dynamicBufferBlock.Post(1));
+            Assert.True(resizableBufferBlock.Post(1));
 
             //But we can dynamically set the bounded capacity at any point.
-            dynamicBufferBlock.BoundedCapacity = 2;
-            Assert.True(dynamicBufferBlock.Post(2));
-            Assert.False(dynamicBufferBlock.Post(3));
+            resizableBufferBlock.BoundedCapacity = 2;
+            Assert.True(resizableBufferBlock.Post(2));
+            Assert.False(resizableBufferBlock.Post(3));
 
-            dynamicBufferBlock.BoundedCapacity = 3;
-            Assert.True(dynamicBufferBlock.Post(3));
+            resizableBufferBlock.BoundedCapacity = 3;
+            Assert.True(resizableBufferBlock.Post(3));
         }
 
         [Fact]
@@ -101,6 +102,43 @@ namespace UnitTests.DataFlow
             }
 
             Assert.True(testSubject.BatchSize > 50 && testSubject.BatchSize < 150, $"Final batch size {testSubject.BatchSize} should be near optimal of 100.");
+        }
+
+
+
+        IPropagatorBlock<I, O> IfThenElseBlock<I, O>(
+            Predicate<I> predicate,
+            IPropagatorBlock<I, O> thenBlock,
+            IPropagatorBlock<I, O> elseBlock,
+            int boundedCapacity)
+        {
+
+            var inputBuffer = new BufferBlock<I>(new DataflowBlockOptions()
+            {
+                BoundedCapacity = DataflowBlockOptions.Unbounded
+            });
+
+            inputBuffer.LinkTo(
+                thenBlock,
+                new DataflowLinkOptions() { PropagateCompletion = true },
+                predicate
+            );
+
+            inputBuffer.LinkTo(
+                elseBlock,
+                new DataflowLinkOptions() { PropagateCompletion = true },
+                m => !predicate(m)
+            );
+
+
+            var outputBuffer = new BufferBlock<O>(new DataflowBlockOptions()
+            {
+                BoundedCapacity = DataflowBlockOptions.Unbounded
+            });
+
+            var res = DataflowBlock.Encapsulate(inputBuffer, outputBuffer);
+
+            return res.WithBoundedCapacity(boundedCapacity); // <-- this is the magic.
         }
     }
 }

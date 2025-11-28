@@ -21,7 +21,7 @@ namespace CounterpointCollective.DataFlow
         private readonly SemaphoreSlim _semRunNextBatch;
 
         private readonly BoundedPropagatorBlock<I,O> _boundedPropagatorBlock;
-        private readonly DynamicBufferBlock<I> _batchGatherBlock;
+        private readonly ResizableBufferBlock<I> _batchGatherBlock;
         private readonly TransformManyBlock<I[], O> _transformManyBlock;
 
         private DateTime earliestEntrance;
