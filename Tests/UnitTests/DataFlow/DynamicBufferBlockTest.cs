@@ -1,8 +1,5 @@
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks.Dataflow;
-using DocumentFormat.OpenXml.Wordprocessing;
 using CounterpointCollective.DataFlow;
-using Xunit;
+using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
 {

@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Implementation\ComposableDataflowBlocks.csproj" />
+    <ProjectReference Include="..\..\Source\ComposableDataflowBlocks\ComposableDataflowBlocks.csproj" />
   </ItemGroup>
 
   <ItemGroup>

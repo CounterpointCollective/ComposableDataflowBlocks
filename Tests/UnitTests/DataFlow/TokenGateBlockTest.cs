@@ -1,9 +1,5 @@
-using System.Threading.Tasks.Dataflow;
 using CounterpointCollective.DataFlow;
-using CounterpointCollective.DataFlow.Encapsulation;
-using CounterpointCollective.DataFlow.Notifying;
-using Microsoft.Graph;
-using Schema.NET;
+using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
 {

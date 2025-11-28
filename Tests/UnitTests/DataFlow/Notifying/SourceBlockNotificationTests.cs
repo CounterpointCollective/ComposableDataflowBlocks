@@ -1,7 +1,6 @@
-using System.Threading.Tasks.Dataflow;
-using DocumentFormat.OpenXml.Office2016.Drawing.Command;
 using CounterpointCollective.DataFlow;
 using CounterpointCollective.DataFlow.Notifying;
+using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow.Notifying
 {
