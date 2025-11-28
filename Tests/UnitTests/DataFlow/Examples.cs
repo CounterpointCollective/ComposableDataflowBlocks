@@ -103,42 +103,5 @@ namespace UnitTests.DataFlow
 
             Assert.True(testSubject.BatchSize > 50 && testSubject.BatchSize < 150, $"Final batch size {testSubject.BatchSize} should be near optimal of 100.");
         }
-
-
-
-        IPropagatorBlock<I, O> IfThenElseBlock<I, O>(
-            Predicate<I> predicate,
-            IPropagatorBlock<I, O> thenBlock,
-            IPropagatorBlock<I, O> elseBlock,
-            int boundedCapacity)
-        {
-
-            var inputBuffer = new BufferBlock<I>(new DataflowBlockOptions()
-            {
-                BoundedCapacity = DataflowBlockOptions.Unbounded
-            });
-
-            inputBuffer.LinkTo(
-                thenBlock,
-                new DataflowLinkOptions() { PropagateCompletion = true },
-                predicate
-            );
-
-            inputBuffer.LinkTo(
-                elseBlock,
-                new DataflowLinkOptions() { PropagateCompletion = true },
-                m => !predicate(m)
-            );
-
-
-            var outputBuffer = new BufferBlock<O>(new DataflowBlockOptions()
-            {
-                BoundedCapacity = DataflowBlockOptions.Unbounded
-            });
-
-            var res = DataflowBlock.Encapsulate(inputBuffer, outputBuffer);
-
-            return res.WithBoundedCapacity(boundedCapacity); // <-- this is the magic.
-        }
     }
 }
