@@ -75,7 +75,7 @@ namespace CounterpointCollective.DataFlow
 
         public ResizableBatchTransformBlock(
             Func<I[], Task<IEnumerable<O>>> transform,
-            int batchSize,
+            int initialBatchSize,
             ExecutionDataflowBlockOptions? options = null
         )
         {
@@ -102,7 +102,7 @@ namespace CounterpointCollective.DataFlow
                 new() { CancellationToken = options.CancellationToken, MaxDegreeOfParallelism = options.MaxDegreeOfParallelism }
             );
 
-            BatchSize = batchSize;
+            BatchSize = initialBatchSize;
 
             _boundedPropagatorBlock = new BoundedPropagatorBlock<I, O>(
                 _batchGatherBlock,
@@ -154,11 +154,18 @@ namespace CounterpointCollective.DataFlow
             {
                 if (CanRunBatch())
                 {
-                    if (_batchGatherBlock.TryReceiveAll(out batch))
+                    //First try to get maximally BatchSize items synchronously.
+                    //The buffer may be overfull though, in case we resized to a smaller BatchSize, so we need to check the actual count.
+                    if (!(_batchGatherBlock.Count <= BatchSize && _batchGatherBlock.TryReceiveAll(out batch)))
                     {
-                        return true;
-
+                        //Fall back to slow mode.
+                        batch = [];
+                        while (batch.Count < BatchSize && _batchGatherBlock.TryReceive(out var item))
+                        {
+                            batch.Add(item);
+                        }
                     }
+                    return true;
                 }
                 batch = null;
                 return false;
@@ -175,7 +182,7 @@ namespace CounterpointCollective.DataFlow
                     &&
                     (
                         _batchGatherBlock.Count >= BatchSize
-                        || (_boundedPropagatorBlock.IsCompletionRequested && _batchGatherBlock.Count > 0)
+                        || (_boundedPropagatorBlock.InputCompletion.IsCompletedSuccessfully && _batchGatherBlock.Count > 0)
                     );
             }
         }

@@ -9,12 +9,12 @@ namespace UnitTests.DataFlow
         public async Task ShowCaseBoundedPropagatorBlock()
         {
             //First we create a DataflowBlock ourselves, composed of multiple subblocks.
-            var b = new BufferBlock<int>();
+            var b = new BufferBlock<int>(new() { BoundedCapacity = DataflowBlockOptions.Unbounded });
             var t = new TransformBlock<int, int>(async i =>
             {
                 await Task.Yield(); //simulate some work.
                 return i + 1;
-            }, new());
+            }, new() { BoundedCapacity = DataflowBlockOptions.Unbounded });
             b.LinkTo(t, new DataflowLinkOptions() { PropagateCompletion = true });
             var ourOwnDataflowBlock = DataflowBlock.Encapsulate(b, t);
 
@@ -25,7 +25,9 @@ namespace UnitTests.DataFlow
             //This is what we will use a BoundedPropagatorBlock for.
 
             var testSubject = new BoundedPropagatorBlock<int,int>(ourOwnDataflowBlock, boundedCapacity: 2000);
-            //Notice the boundedCapacity. The BoundedPropagatorBlock will ensure there are never more items in ourOwnDataflowBlock.
+            //Thus we enabled a bounded capacity of 2000 messasge, and realtime counting on our own custom DataflowBlock!
+
+            Assert.Equal(0, testSubject.Count);
 
             //we should be able to push synchronously up to the bounded capacity.
             for (var i = 0; i < 2000; i++)
