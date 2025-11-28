@@ -75,7 +75,7 @@ namespace CounterpointCollective.DataFlow
 
         public ResizableBatchTransformBlock(
             Func<I[], Task<IEnumerable<O>>> transform,
-            int batchSize,
+            int initialBatchSize,
             ExecutionDataflowBlockOptions? options = null
         )
         {
@@ -102,7 +102,7 @@ namespace CounterpointCollective.DataFlow
                 new() { CancellationToken = options.CancellationToken, MaxDegreeOfParallelism = options.MaxDegreeOfParallelism }
             );
 
-            BatchSize = batchSize;
+            BatchSize = initialBatchSize;
 
             _boundedPropagatorBlock = new BoundedPropagatorBlock<I, O>(
                 _batchGatherBlock,

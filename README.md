@@ -92,6 +92,45 @@ dynamicBufferBlock.BoundedCapacity = 3;
 Assert.True(dynamicBufferBlock.Post(3));
 ```
 
+### Example 3: Automatically optimizing batch sizes in real-time
+```csharp
+// Example: Using AutoScaling on a ResizableBatchTransformBlock
+// For demonstration: assume our workload performs best when batch size is ~100 items.
+async Task<IEnumerable<int>> ProcessBatch(int[] batch)
+{
+    var distanceFromOptimal = Math.Abs(batch.Length - 100);
+    await Task.Delay(distanceFromOptimal * batch.Length); // Simulate slower processing when batch isn't optimal
+    return batch;
+}
+
+// Create a ResizableBatchTransformBlock using our ProcessBatch function.
+var testSubject = new ResizableBatchTransformBlock<int, int>(
+    ProcessBatch,
+    initialBatchSize: 1,
+    new ExecutionDataflowBlockOptions { BoundedCapacity = 10000 }
+);
+
+// Batch size can be manually adjusted:
+testSubject.BatchSize = 5;
+
+// Or automatically optimized using AutoScaling:
+testSubject.EnableAutoScaling(
+    new DefaultBatchSizeStrategy(minBatchSize: 1, maxBatchSize: 200)
+);
+
+// Send some work:
+for (var i = 0; i < 10000; i++)
+{
+    await testSubject.SendAsync(i);
+}
+
+// Process outputs while AutoScaling gradually converges toward the optimal batch size (~100).
+for (var i = 0; i < 10000; i++)
+{
+    var result = await testSubject.ReceiveAsync();
+}
+```
+
 ## Language Composition
 
 _ComposableDataflowBlocks_ is written in **C#**.
