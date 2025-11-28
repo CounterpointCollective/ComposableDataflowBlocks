@@ -36,7 +36,8 @@ dotnet restore
 
 ## Usage Example
 
-###BoundedPropagatorBlock Example
+### Example 1: Bounding Your Own Composed Block
+
 ```csharp
 //Example of using a BoundedPropagatorBlock to add bounded capacity and item counting
 
@@ -60,7 +61,7 @@ var ourOwnDataflowBlock = DataflowBlock.Encapsulate(b, t);
 
 var testSubject = new BoundedPropagatorBlock<int,int>(ourOwnDataflowBlock, boundedCapacity: 2000);
 
-//Thus we enabled a bounded capacity of 2000 messasge, and realtime counting on our own custom DataflowBlock!
+//Thus we enabled a bounded capacity of 2000 messasges, and realtime counting on our own custom DataflowBlock!
 
 Assert.Equal(0, testSubject.Count);
 
@@ -70,6 +71,28 @@ for (var i = 0; i < 2000; i++)
     Assert.True(testSubject.Post(i));
     Assert.Equal(i + 1, testSubject.Count); //count is administered properly
 }
+```
+
+### Example 2: Making any DataflowBlock dynamically resizable
+```csharp
+//Example showing that you can dynamically resize the bounded capacity of any block by wrapping it into a BoundedPropagatorBlock
+
+using CounterpointCollective.DataFlow;
+
+var bufferBlock = new BufferBlock<int>(new() { BoundedCapacity = DataflowBlockOptions.Unbounded });
+var dynamicBufferBlock = new BoundedPropagatorBlock<int,int>(DataflowBlock.Encapsulate(bufferBlock));
+
+//We did not specify a bounded capacity, so it defaults to DataflowblockOptions.Unbounded
+
+Assert.True(dynamicBufferBlock.Post(1));
+
+//But we can dynamically set the bounded capacity at any point.
+dynamicBufferBlock.BoundedCapacity = 2;
+Assert.True(dynamicBufferBlock.Post(2));
+Assert.False(dynamicBufferBlock.Post(3));
+
+dynamicBufferBlock.BoundedCapacity = 3;
+Assert.True(dynamicBufferBlock.Post(3));
 ```
 
 ## Language Composition
