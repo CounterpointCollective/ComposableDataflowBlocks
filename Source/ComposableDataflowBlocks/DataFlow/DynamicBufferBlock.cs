@@ -1,6 +1,6 @@
+using CounterpointCollective.DataFlow.Encapsulation;
 using System;
 using System.Threading.Tasks.Dataflow;
-using CounterpointCollective.DataFlow.Encapsulation;
 
 namespace CounterpointCollective.DataFlow
 {

@@ -1,12 +1,10 @@
+using CounterpointCollective.DataFlow.Encapsulation;
+using CounterpointCollective.DataFlow.Notifying;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CounterpointCollective.DataFlow.Encapsulation;
-using CounterpointCollective.DataFlow.Internal;
-using CounterpointCollective.DataFlow.Notifying;
 
 namespace CounterpointCollective.DataFlow
 {

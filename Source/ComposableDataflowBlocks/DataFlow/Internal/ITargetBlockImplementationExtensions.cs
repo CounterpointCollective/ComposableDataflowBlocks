@@ -1,7 +1,7 @@
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks.Dataflow;
-using System;
 
 namespace CounterpointCollective.DataFlow.Internal;
 

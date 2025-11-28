@@ -1,9 +1,8 @@
+using CounterpointCollective.Threading;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CounterpointCollective.Threading;
 
 namespace CounterpointCollective.DataFlow.Internal
 {

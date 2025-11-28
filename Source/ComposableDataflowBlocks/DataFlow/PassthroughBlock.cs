@@ -1,3 +1,6 @@
+using ComposableDataflowBlocks.CounterpointCollective.Utilities;
+using CounterpointCollective.DataFlow.Internal;
+using CounterpointCollective.Threading;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,9 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using ComposableDataflowBlocks.CounterpointCollective.Utilities;
-using CounterpointCollective.DataFlow.Internal;
-using CounterpointCollective.Threading;
 
 namespace CounterpointCollective.DataFlow
 {

@@ -1,6 +1,5 @@
-﻿using System.Text.Json;
-using CounterpointCollective.Utilities;
-using Xunit;
+﻿using CounterpointCollective.Utilities;
+using System.Text.Json;
 
 namespace UnitTests.Utilities
 {

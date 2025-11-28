@@ -1,5 +1,5 @@
-using System.Threading.Tasks.Dataflow;
 using CounterpointCollective.DataFlow;
+using System.Threading.Tasks.Dataflow;
 using static CounterpointCollective.DataFlow.ParallelityExtensions;
 
 namespace UnitTests.DataFlow
