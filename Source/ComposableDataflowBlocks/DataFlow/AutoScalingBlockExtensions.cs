@@ -63,11 +63,6 @@ namespace CounterpointCollective.DataFlow
         public double DeltaThroughput { get; set; }
         public double DeltaThroughputPerDeltaBatch =>
             DeltaBatch == 0 ? 0 : DeltaThroughput / DeltaBatch;
-#pragma warning disable CA1822 // Mark members as static
-        public double LearningFactor => 1;
-#pragma warning restore CA1822 // Mark members as static
-
-        public double ScaledAdjustment => LearningFactor * DeltaThroughputPerDeltaBatch * AllowedBatchSizeRange;
 
         public double S1Calculated { get; set; }
         public double S2SetPoint { get; set; }
@@ -86,11 +81,38 @@ namespace CounterpointCollective.DataFlow
         public object DebugView { get; }
     }
 
+    /// <summary>
+    /// Default implementation that monitors throughput and adjusts batch size accordingly.
+    /// </summary>
+    /// <param name="minBatchSize"></param>
+    /// The smallest batch size the strategy may select.
+    /// <param name="maxBatchSize"></param>
+    /// The largest batch size the strategy may select.
+    /// <param name="initialBatchSize"></param>
+    /// The first batch size the strategy will set.
+    /// <param name="adjustmentSensitivity">
+    /// Controls how aggressively the strategy reacts to throughput changes.
+    /// Higher values cause larger adjustments; lower values make the strategy steadier.
+    /// </param>
+    /// <param name="maxAdjustmentFraction">
+    /// Limits how far the batch size may move in a single adjustment,
+    /// expressed as a fraction of the allowed batch size range.
+    /// Prevents sudden large jumps.
+    /// </param>
+    /// <param name="dampeningWindowSize">
+    /// Number of recent calculated setpoints to average together to smooth fluctuations.
+    /// Larger values produce a more stable, slower-responding batch size.
+    /// </param>
+    /// <param name="maxQueryTimeSeconds">
+    /// Maximum expected duration of a single batch run, used for safety/timeout logic.
+    /// </param>
     public class DefaultBatchSizeStrategy(
         int minBatchSize = 1, 
         int maxBatchSize = 50, 
         int initialBatchSize = 50,
-        double maxDeltaOfRange = 0.1,
+        double adjustmentSensitivity = 0.1,
+        double maxAdjustmentFraction = 0.1,
+        int dampeningWindowSize = 5,
         int maxQueryTimeSeconds = 60
     ): IBatchSizeStrategy
     {
@@ -102,7 +124,7 @@ namespace CounterpointCollective.DataFlow
 
         private readonly Random _rndm = new();
         private BatchStat? prevBatchStat;
-        private readonly LowPassFilter _lowPassFilter = new(5, initialBatchSize);
+        private readonly LowPassFilter _lowPassFilter = new(dampeningWindowSize, initialBatchSize);
 
         public int BatchSize { get; private set; } = initialBatchSize;
 
@@ -146,19 +168,19 @@ namespace CounterpointCollective.DataFlow
             bsc.DeltaBatch = currStat.BatchSize - prevBatchStat.BatchSize;
             bsc.DeltaThroughput = currStat.Throughput - prevBatchStat.Throughput;
 
-            var betterBatch = currStat.Throughput > prevBatchStat!.Throughput ? currStat.BatchSize : prevBatchStat.BatchSize;
+            var betterBatchSize = currStat.Throughput > prevBatchStat!.Throughput ? currStat.BatchSize : prevBatchStat.BatchSize;
+            var scaledAdjustment = adjustmentSensitivity * bsc.DeltaThroughputPerDeltaBatch * bsc.AllowedBatchSizeRange;
+            var setpoint = betterBatchSize + scaledAdjustment;
 
-            var setpoint = betterBatch + bsc!.ScaledAdjustment;
-
-            if (Math.Abs(bsc.ScaledAdjustment / bsc.AllowedBatchSizeRange) > maxDeltaOfRange)
+            if (Math.Abs(scaledAdjustment / bsc.AllowedBatchSizeRange) > maxAdjustmentFraction)
             {
-                if (bsc.ScaledAdjustment > 0)
+                if (scaledAdjustment > 0)
                 {
-                    setpoint = currStat.BatchSize + (bsc.AllowedBatchSizeRange * maxDeltaOfRange);
+                    setpoint = currStat.BatchSize + (bsc.AllowedBatchSizeRange * maxAdjustmentFraction);
                 }
                 else
                 {
-                    setpoint = currStat.BatchSize - (bsc.AllowedBatchSizeRange * maxDeltaOfRange);
+                    setpoint = currStat.BatchSize - (bsc.AllowedBatchSizeRange * maxAdjustmentFraction);
                 }
             }
 
