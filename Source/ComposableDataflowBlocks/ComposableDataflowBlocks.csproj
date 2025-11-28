@@ -33,11 +33,11 @@
 
   <ItemGroup>
     <Compile Remove="Collection\**" />
-    <Compile Remove="Utilities\BinaryStore\**" />
+    <Compile Remove="CounterpointCollective.Utilities\BinaryStore\**" />
     <EmbeddedResource Remove="Collection\**" />
-    <EmbeddedResource Remove="Utilities\BinaryStore\**" />
+    <EmbeddedResource Remove="CounterpointCollective.Utilities\BinaryStore\**" />
     <None Remove="Collection\**" />
-    <None Remove="Utilities\BinaryStore\**" />
+    <None Remove="CounterpointCollective.Utilities\BinaryStore\**" />
   </ItemGroup>
 
   <ItemGroup>

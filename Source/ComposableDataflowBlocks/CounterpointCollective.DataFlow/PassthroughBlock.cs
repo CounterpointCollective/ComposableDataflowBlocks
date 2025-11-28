@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using ComposableDataflowBlocks.CounterpointCollective.Utilities;
 using CounterpointCollective.DataFlow.Internal;
 using CounterpointCollective.Threading;
 

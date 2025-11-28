@@ -1,6 +1,6 @@
 using System;
 
-namespace CounterpointCollective
+namespace ComposableDataflowBlocks.CounterpointCollective.Utilities
 {
     public sealed class ActionDisposable : IDisposable
     {
