@@ -53,26 +53,6 @@ namespace CounterpointCollective.DataFlow
             return t;
         }
 
-        [Obsolete("Use Transform and Flatten instead")]
-        public static ISourceBlock<O> TransformMany<I, O>(
-            this ISourceBlock<I> source,
-            Func<I, ISourceBlock<O>> f
-        ) => TransformMany(source, f, new(), new());
-
-        [Obsolete("Use Transform and Flatten instead")]
-        public static ISourceBlock<O> TransformMany<I, O>(
-            this ISourceBlock<I> source,
-            Func<I, ISourceBlock<O>> f,
-            ExecutionDataflowBlockOptions optsForProcessing,
-            DataflowBlockOptions optsForBuffer
-        ) => TransformMany(source, i => Task.FromResult(f(i)), optsForProcessing, optsForBuffer);
-
-        [Obsolete("Use Transform and Flatten instead")]
-        public static ISourceBlock<O> TransformMany<I, O>(
-            this ISourceBlock<I> source,
-            Func<I, Task<ISourceBlock<O>>> f
-        ) => TransformMany(source, f, new(), new());
-
         public static  ISourceBlock<T> Flatten<T> (
             this ISourceBlock<ISourceBlock<T>> sources,
             ExecutionDataflowBlockOptions? options = null

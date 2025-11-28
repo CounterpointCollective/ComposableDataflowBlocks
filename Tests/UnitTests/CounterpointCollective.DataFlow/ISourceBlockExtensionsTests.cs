@@ -16,11 +16,11 @@ namespace UnitTests.DataFlow
                 .ToAsyncEnumerable()
                 .AsSourceBlock()
                 .Batch(32)
-                .TransformMany(
+                .Transform(
                     x => x.ToAsyncEnumerable().AsSourceBlock(),
-                    new() { MaxDegreeOfParallelism = 10, EnsureOrdered = true },
                     new()
                 )
+                .Flatten()
                 .AsAsyncEnumerable()
                 .ToListAsync();
             Assert.Equal(range, transformed);
