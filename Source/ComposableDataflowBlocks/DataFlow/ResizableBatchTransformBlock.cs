@@ -175,7 +175,7 @@ namespace CounterpointCollective.DataFlow
                     &&
                     (
                         _batchGatherBlock.Count >= BatchSize
-                        || (_boundedPropagatorBlock.IsCompletionRequested && _batchGatherBlock.Count > 0)
+                        || (_boundedPropagatorBlock.InputCompletion.IsCompletedSuccessfully && _batchGatherBlock.Count > 0)
                     );
             }
         }
