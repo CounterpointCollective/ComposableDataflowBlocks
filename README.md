@@ -71,6 +71,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - [Issues](https://github.com/CounterpointCollective/ComposableDataflowBlocks/issues)
 - [Pull Requests](https://github.com/CounterpointCollective/ComposableDataflowBlocks/pulls)
 
----
-
-*This README is a starting point. Feel free to customize the project description, add real code examples, and refine installation instructions as needed.*
