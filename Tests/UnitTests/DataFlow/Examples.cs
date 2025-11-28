@@ -99,6 +99,8 @@ namespace UnitTests.DataFlow
             {
                 var result = await testSubject.ReceiveAsync();
             }
+
+            Assert.True(testSubject.BatchSize > 50 && testSubject.BatchSize < 150, $"Final batch size {testSubject.BatchSize} should be near optimal of 100.");
         }
     }
 }
