@@ -154,11 +154,18 @@ namespace CounterpointCollective.DataFlow
             {
                 if (CanRunBatch())
                 {
-                    if (_batchGatherBlock.TryReceiveAll(out batch))
+                    //First try to get maximally BatchSize items synchronously.
+                    //The buffer may be overfull though, in case we resized to a smaller BatchSize, so we need to check the actual count.
+                    if (!(_batchGatherBlock.Count <= BatchSize && _batchGatherBlock.TryReceiveAll(out batch)))
                     {
-                        return true;
-
+                        //Fall back to slow mode.
+                        batch = [];
+                        while (batch.Count < BatchSize && _batchGatherBlock.TryReceive(out var item))
+                        {
+                            batch.Add(item);
+                        }
                     }
+                    return true;
                 }
                 batch = null;
                 return false;
