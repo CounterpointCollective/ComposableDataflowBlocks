@@ -5,7 +5,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace CounterpointCollective.DataFlow
 {
-    public class BoundedPropagatorBlock<I,O> : BoundedTargetBlock<I>, IReceivableSourceBlock<O>
+    public class BoundedPropagatorBlock<I,O> : BoundedTargetBlock<I>, IReceivableSourceBlock<O>, IPropagatorBlock<I,O>
     {
         private ISourceBlock<O> SourceSide { get; }
         public BoundedPropagatorBlock(
