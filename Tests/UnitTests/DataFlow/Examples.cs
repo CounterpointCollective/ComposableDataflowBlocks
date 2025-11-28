@@ -97,7 +97,7 @@ namespace UnitTests.DataFlow
             // Process outputs while AutoScaling gradually converges toward the optimal batch size (~100).
             for (var i = 0; i < 10000; i++)
             {
-                var result = await testSubject.ReceiveAsync();
+                await testSubject.ReceiveAsync();
             }
 
             Assert.True(testSubject.BatchSize > 50 && testSubject.BatchSize < 150, $"Final batch size {testSubject.BatchSize} should be near optimal of 100.");
