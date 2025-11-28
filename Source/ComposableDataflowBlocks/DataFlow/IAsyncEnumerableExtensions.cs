@@ -71,45 +71,5 @@ namespace CounterpointCollective.DataFlow
                 target.Fault(e);
             }
         }
-
-        public static async IAsyncEnumerable<Either<Exception, T>> TryAsync<T>(
-            this IAsyncEnumerable<T> source
-        )
-        {
-            await using var e = source.GetAsyncEnumerator();
-            while (true)
-            {
-                Either<Exception, T> res;
-
-                try
-                {
-                    if (await e.MoveNextAsync())
-                    {
-                        res = new(e.Current);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    res = new(ex);
-                }
-
-                yield return res;
-            }
-        }
-
-        public static async IAsyncEnumerable<T> CatchAsync<T>(
-            this IAsyncEnumerable<Either<Exception, T>> source
-        )
-        {
-            await using var e = source.GetAsyncEnumerator();
-            while (await e.MoveNextAsync())
-            {
-                yield return e.Current.IsLeft ? throw e.Current.FromLeft : e.Current.FromRight;
-            }
-        }
     }
 }
