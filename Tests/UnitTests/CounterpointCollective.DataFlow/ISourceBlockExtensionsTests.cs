@@ -1,7 +1,4 @@
-using System;
-using System.Threading.Tasks.Dataflow;
 using CounterpointCollective.DataFlow;
-using Xunit;
 
 namespace UnitTests.DataFlow
 {
