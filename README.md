@@ -92,7 +92,46 @@ dynamicBufferBlock.BoundedCapacity = 3;
 Assert.True(dynamicBufferBlock.Post(3));
 ```
 
-### Example 3: Automatically optimizing batch sizes in real-time
+### Example 3: Making your own Dataflowblock with advanced bounding features
+```csharp
+//We can easily make a TransformManyBlock that has a bounded capacity on its output queue.
+
+var totalBoundedCapacity = 20;
+var outputQueueBoundedCapacity = 5;
+
+BoundedPropagatorBlock<int, int> testSubject = null!;
+
+var outputQueue = new BufferBlock<int>(new() { BoundedCapacity = outputQueueBoundedCapacity });
+var inputBlock = new ActionBlock<int>(async i =>
+    {
+        // Simulate producing multiple outputs per input
+        for (var j = 0; j < 3; j++)
+        {
+            if (j > 0)
+            {
+                testSubject.AdjustCount(1); // Pay for additional outputs
+            }
+            await outputQueue.SendAsync(j * 10 + i);
+        }
+    },
+    new() { BoundedCapacity = DataflowBlockOptions.Unbounded });
+testSubject = new BoundedPropagatorBlock<int, int>(inputBlock, outputQueue, totalBoundedCapacity);
+
+testSubject.Post(1);
+await Task.Delay(100); //give some time to process
+Assert.Equal(3, testSubject.Count);
+
+testSubject.Post(1);
+await Task.Delay(100); //give some time to process
+Assert.Equal(6, testSubject.Count);
+Assert.Equal(5, outputQueue.Count);
+
+testSubject.Post(1);
+await Task.Delay(100); //give some time to process
+Assert.Equal(7, testSubject.Count); //Messages are now stuck because output queue is full
+```
+
+### Example 4: Automatically optimizing batch sizes in real-time
 ```csharp
 // Example: Using AutoScaling on a ResizableBatchTransformBlock
 // For demonstration: assume our workload performs best when batch size is ~100 items.
