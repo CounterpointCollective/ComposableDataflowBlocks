@@ -1,18 +1,26 @@
 # ComposableDataflowBlocks
 
-ComposableDataflowBlocks is a library designed to simplify the construction and orchestration of dataflow-based systems. It provides a collection of modular, reusable blocks for processing and transforming data, enabling developers to build complex workflows with composability, scalability, and clarity.
+ComposableDataflowBlocks is a library designed to simplify the construction DataflowBlock pipelines.
+It provides a collection of modular, reusable blocks for processing and transforming data, enabling developers to build complex workflows 
+with composability, scalability, and clarity.
 
 ## Purpose
 
-The goal of ComposableDataflowBlocks is to accelerate development of robust data pipelines, workflow engines, and real-time processing applications. By offering ready-to-use, extensible blocks, the library empowers users to define custom data transformations, branching logic, event handling, and more, all while maintaining a clean and maintainable codebase.
+The goal of ComposableDataflowBlocks is to accelerate development of robust data pipelines, workflow engines, and real-time processing 
+applications. By offering ready-to-use, extensible blocks, the library empowers users to define custom data transformations, 
+branching logic, event handling, and more, all while maintaining a clean and maintainable codebase.
 
 ## Features
 
-- **Composable dataflow blocks:** Combine simple processing units to build sophisticated pipelines.
-- **Easy integration:** Seamlessly embed blocks into existing applications.
-- **Scalable architecture:** Design workflows suitable for small scripts or large-scale systems.
-- **Extensibility:** Create and integrate custom blocks for domain-specific use cases.
-- **Error handling and monitoring:** Built-in support for pipeline integrity and analysis.
+- **BoundedBlocks:** Allow adding bounded capacity and real-time item counting to any Dataflow propagator block, including user-composed
+or encapsulated blocks, enabling true compositionality.
+- **ResizableBlocks:** Dynamically adjusts the bounded capacity of any block at runtime.
+- **AutoScalingBlock:** Automatically determines and optimizes batch sizes at runtime by measuring throughput, ensuring efficient processing 
+without manual tuning.
+- **OrderPreservingChoiceBlock:** Routes items to different targets based on a predicate while preserving the original order of the items.
+- **ParallelBlock:** Sends messages to multiple blocks in parallel and recombines the results, facilitating concurrent processing.
+- **GroupAdjacentBlock:** Groups consecutive items that share a key or predicate into batches, simplifying aggregation and batch processing.
+- **PriorityBufferBlock:** Delivers highest-priority messages first, dynamically reordering when new higher-priority items arrive.
 
 ## Installation
 
@@ -25,32 +33,14 @@ Install dependencies (if any):
 # Example for .NET/C# projects
 dotnet restore
 ```
-*(Please adjust according to the project's actual language/tech stack.)*
 
 ## Usage Example
 
 ```csharp
-// Example: Building a simple dataflow pipeline
-
-using ComposableDataflowBlocks;
-
-var source = new SourceBlock<int>(new[] { 1, 2, 3, 4 });
-var transform = new TransformBlock<int, int>(x => x * 2);
-var sink = new ActionBlock<int>(x => Console.WriteLine(x));
-
-// Connect the blocks
-source.LinkTo(transform);
-transform.LinkTo(sink);
-
-// Start the source
-source.PostAll();
-source.Complete();
-```
-*(Replace this with an actual code snippet representative of the project.)*
 
 ## Language Composition
 
-_ComposableDataflowBlocks_ is written primarily in **C#**, and may use additional technologies for auxiliary tools or tests.
+_ComposableDataflowBlocks_ is written in **C#**.
 
 ## Contributing
 
