@@ -46,7 +46,7 @@ namespace CounterpointCollective.DataFlow
             options ??= new();
 
 
-            var entrance = new StreamingGroupByBlock<I, bool, I>(h => pred(h), h => h, new() { CancellationToken = options.CancellationToken }, flushOnIdle: true);
+            var entrance = new GroupAdjacentBlock<I, bool, I>(h => pred(h), h => h, new() { CancellationToken = options.CancellationToken }, flushOnIdle: true);
             _outputBuffer = new BufferBlock<O>(new() { CancellationToken = options.CancellationToken });
 
             _boundedPropagatorBlock = new BoundedPropagatorBlock<I, O>(

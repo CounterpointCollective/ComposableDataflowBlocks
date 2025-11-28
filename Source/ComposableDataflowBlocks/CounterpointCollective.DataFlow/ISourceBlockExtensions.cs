@@ -163,14 +163,14 @@ namespace CounterpointCollective.DataFlow
             return res;
         }
 
-        public static ISourceBlock<IGrouping<K, V>> StreamingGroupBy<T, K, V>(
+        public static ISourceBlock<IGrouping<K, V>> GroupAdjacent<T, K, V>(
             this ISourceBlock<T> source,
             Func<T, K> keySelector,
             Func<T, V> valueSelector,
             DataflowBlockOptions options
         )
         {
-            var res = new StreamingGroupByBlock<T, K, V>(keySelector, valueSelector, options);
+            var res = new GroupAdjacentBlock<T, K, V>(keySelector, valueSelector, options);
             _ = source.LinkTo(res, new DataflowLinkOptions { PropagateCompletion = true });
             return res;
         }

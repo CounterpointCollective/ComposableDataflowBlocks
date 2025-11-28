@@ -242,8 +242,8 @@ namespace CounterpointCollective.DataFlow.Encapsulation
         );
 
 
-        public static IEncapsulationBuilder<TFirst, StreamingGroupByBlock<T, K, V>>
-        StreamingGroupBy<TFirst, T, K, V>
+        public static IEncapsulationBuilder<TFirst, GroupAdjacentBlock<T, K, V>>
+        GroupAdjacent<TFirst, T, K, V>
             (this IEncapsulationBuilder<TFirst, ISourceBlock<T>> eb,
             Func<T, K> keySelector,
             Func<T, V> valueSelector,
@@ -251,7 +251,7 @@ namespace CounterpointCollective.DataFlow.Encapsulation
             bool flushOnIdle = false
         )
             where TFirst : IDataflowBlock
-        => eb.LinkTo(new StreamingGroupByBlock<T, K, V>(keySelector, valueSelector, options, flushOnIdle), new DataflowLinkOptions() { PropagateCompletion = true });
+        => eb.LinkTo(new GroupAdjacentBlock<T, K, V>(keySelector, valueSelector, options, flushOnIdle), new DataflowLinkOptions() { PropagateCompletion = true });
 
         /// <summary>
         /// Wraps the end of the current encapsulation builder in a SynchronousFilterBlock.
