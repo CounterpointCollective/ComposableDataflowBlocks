@@ -35,7 +35,7 @@ dotnet restore
 ```
 
 ## Usage Example
-s
+
 ###BoundedPropagatorBlock Example
 ```csharp
 //Example of using a BoundedPropagatorBlock to add bounded capacity and item counting
