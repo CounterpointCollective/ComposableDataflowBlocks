@@ -64,7 +64,7 @@ Contributions are welcome! If you'd like to suggest improvements, report bugs, o
 
 ## License
 
-Distributed under the [license name] License. See `LICENSE` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Resources
 
