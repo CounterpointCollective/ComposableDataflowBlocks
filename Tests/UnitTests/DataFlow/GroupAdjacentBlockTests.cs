@@ -1,9 +1,9 @@
-using System.Threading.Tasks.Dataflow;
 using CounterpointCollective.DataFlow;
+using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
 {
-    public class StreamingGroupByBlockTest
+    public class GroupAdjacentBlockTests
     {
         [Fact]
         public async Task TestNormalFlow()
@@ -11,7 +11,7 @@ namespace UnitTests.DataFlow
             int[] inputs = [1, 1, 2, 2, 1, 2];
             var input = inputs.AsSourceBlock();
 
-            var t = input.StreamingGroupBy(e => e, e => e, new());
+            var t = input.GroupAdjacent(e => e, e => e, new());
 
             var g = await t.ReceiveAsync();
             Assert.Equal(1, g.Key);
@@ -35,8 +35,8 @@ namespace UnitTests.DataFlow
 
             var input = new BufferBlock<int>(new());
             var testSubject =
-                (StreamingGroupByBlock<int, int, int>)
-                    input.StreamingGroupBy(e => e, e => e, new() { CancellationToken = cts.Token });
+                (GroupAdjacentBlock<int, int, int>)
+                    input.GroupAdjacent(e => e, e => e, new() { CancellationToken = cts.Token });
 
             input.PostAsserted(1);
             input.PostAsserted(1);

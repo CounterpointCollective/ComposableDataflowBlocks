@@ -1,9 +1,9 @@
+using CounterpointCollective.DataFlow.Encapsulation;
+using CounterpointCollective.DataFlow.Internal;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CounterpointCollective.DataFlow.Encapsulation;
-using CounterpointCollective.DataFlow.Internal;
 namespace CounterpointCollective.DataFlow
 {
     public record AdmissionGateHooks

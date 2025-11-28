@@ -1,16 +1,16 @@
+using CounterpointCollective.DataFlow.Encapsulation;
+using CounterpointCollective.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CounterpointCollective.DataFlow.Encapsulation;
-using CounterpointCollective.Utilities;
 
 namespace CounterpointCollective.DataFlow
 {
 
-    public static class ParallelityExtensions
+    public static class ParallelDataflowBlockExtensions
     {
         public static IPropagatorBlock<I, O> Par<I, T1, T2, O>(
             this IPropagatorBlock<I, T1> p1,
@@ -19,7 +19,7 @@ namespace CounterpointCollective.DataFlow
             GuaranteedBroadcastBlockOptions options
         )
         {
-            var ret = new ParBlock<I, Either<T1, T2>, O>(2, Recombine, options);
+            var ret = new ParallelBlock<I, Either<T1, T2>, O>(2, Recombine, options);
 
             O Recombine(Either<T1, T2>[] inputs)
             {
@@ -56,13 +56,13 @@ namespace CounterpointCollective.DataFlow
             .AddBlocks(blocks)
             .Par();
 
-        public static ParBlock<I, T, O> Par<I, T, O>(
+        public static ParallelBlock<I, T, O> Par<I, T, O>(
             this IPropagatorBlock<I, T>[] blocks,
             Func<T[], O> recombine,
             GuaranteedBroadcastBlockOptions options
         )
         {
-            var res = new ParBlock<I, T, O>(
+            var res = new ParallelBlock<I, T, O>(
                 blocks.Length,
                 recombine,
                 options
@@ -80,14 +80,14 @@ namespace CounterpointCollective.DataFlow
             .AddBlockFactories(blockFactories)
             .ParAsync(cancellationToken);
 
-        public static ParBlock<I, T, O> ParAsync<I, T, O>(
+        public static ParallelBlock<I, T, O> ParAsync<I, T, O>(
             this Func<CancellationToken, Task<IPropagatorBlock<I, T>>>[] blockFactories,
             Func<T[], O> recombine,
             GuaranteedBroadcastBlockOptions options,
             CancellationToken cancellationToken
         )
         {
-            var res = new ParBlock<I, T, O>(
+            var res = new ParallelBlock<I, T, O>(
                 blockFactories.Length,
                 recombine,
                 options
@@ -172,7 +172,7 @@ namespace CounterpointCollective.DataFlow
                 return this;
             }
 
-            public ParBlock<I, T, O> Build(CancellationToken cancellationToken = default)
+            public ParallelBlock<I, T, O> Build(CancellationToken cancellationToken = default)
                 => _blockFactories.ToArray().ParAsync<I,T,O>(recombine, Options, cancellationToken);
         }
 
@@ -237,7 +237,7 @@ namespace CounterpointCollective.DataFlow
                 return this;
             }
 
-            public ParBlock<I, T, O> Build()
+            public ParallelBlock<I, T, O> Build()
                 => _blocks.ToArray().Par<I, T, O>(recombine, Options);
         }
     }

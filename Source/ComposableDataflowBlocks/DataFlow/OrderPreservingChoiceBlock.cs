@@ -1,11 +1,11 @@
+using CounterpointCollective.DataFlow.Encapsulation;
+using CounterpointCollective.DataFlow.Notifying;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CounterpointCollective.DataFlow.Encapsulation;
-using CounterpointCollective.DataFlow.Notifying;
 
 namespace CounterpointCollective.DataFlow
 {
@@ -46,7 +46,7 @@ namespace CounterpointCollective.DataFlow
             options ??= new();
 
 
-            var entrance = new StreamingGroupByBlock<I, bool, I>(h => pred(h), h => h, new() { CancellationToken = options.CancellationToken }, flushOnIdle: true);
+            var entrance = new GroupAdjacentBlock<I, bool, I>(h => pred(h), h => h, new() { CancellationToken = options.CancellationToken }, flushOnIdle: true);
             _outputBuffer = new BufferBlock<O>(new() { CancellationToken = options.CancellationToken });
 
             _boundedPropagatorBlock = new BoundedPropagatorBlock<I, O>(

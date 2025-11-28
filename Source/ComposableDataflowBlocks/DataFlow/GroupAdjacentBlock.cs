@@ -6,7 +6,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace CounterpointCollective.DataFlow
 {
-    public class StreamingGroupByBlock<T, K, V> : AbstractEncapsulatedPropagatorBlock<T, IGrouping<K, V>>
+    public class GroupAdjacentBlock<T, K, V> : AbstractEncapsulatedPropagatorBlock<T, IGrouping<K, V>>
     {
         private sealed class Grouping(K key, IEnumerable<V> values) : IGrouping<K, V>
         {
@@ -25,7 +25,7 @@ namespace CounterpointCollective.DataFlow
 
         public int Count => _boundedPropagatorBlock.Count;
 
-        public StreamingGroupByBlock(
+        public GroupAdjacentBlock(
             Func<T, K> keySelector,
             Func<T, V> valueSelector,
             DataflowBlockOptions options,
@@ -39,6 +39,14 @@ namespace CounterpointCollective.DataFlow
 
             var inputBlock = new BufferBlock<T>(new() { CancellationToken = options.CancellationToken });
 
+
+            void EmitCurrentGrouping()
+            {
+                var g = new Grouping(currentKey, currentGroup);
+                outputBlock.PostAsserted(g);
+                currentGroup.Clear();
+            }
+
             var a =
                 inputBlock.Action(e =>
                 {
@@ -46,17 +54,13 @@ namespace CounterpointCollective.DataFlow
                     var v = valueSelector(e);
                     if (currentGroup.Count > 0 && !EqualityComparer<K>.Default.Equals(currentKey, k))
                     {
-                        var g = new Grouping(currentKey, currentGroup);
-                        outputBlock.PostAsserted(g);
-                        currentGroup.Clear();
+                        EmitCurrentGrouping();
                     }
                     currentKey = k;
                     currentGroup.Add(v);
                     if (flushOnIdle && inputBlock.Count == 0)
                     {
-                        var g = new Grouping(currentKey, currentGroup);
-                        outputBlock.PostAsserted(g);
-                        currentGroup.Clear();
+                        EmitCurrentGrouping();
                     }
                 }, new() { CancellationToken = options.CancellationToken, SingleProducerConstrained = true });
 
@@ -66,9 +70,7 @@ namespace CounterpointCollective.DataFlow
                 {
                     if (currentGroup.Count > 0)
                     {
-                        var g = new Grouping(currentKey, currentGroup);
-                        outputBlock.PostAsserted(g);
-                        currentGroup.Clear();
+                        EmitCurrentGrouping();
                     }
                     outputBlock.Complete();
                 }

@@ -1,15 +1,14 @@
-using System.Threading.Tasks.Dataflow;
 using CounterpointCollective.DataFlow;
-using CounterpointCollective.DataFlow.Notifying;
+using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
 {
-    public class ParBlockTests
+    public class ParallelBlockTests
     {
         [Fact]
         public async Task TestMinCountMode()
         {
-            var testSubject = new ParBlock<int, int, int> (2, e => e.Max(), new()
+            var testSubject = new ParallelBlock<int, int, int> (2, e => e.Max(), new()
             {
                 BoundedCapacityMode = GuaranteedBroadcastBlockBoundedCapacityMode.SmallestQueue,
                 BoundedCapacity = 2
@@ -40,7 +39,7 @@ namespace UnitTests.DataFlow
         [Fact]
         public async Task TestMaxCountMode()
         {
-            var testSubject = new ParBlock<int, int, int>(2, e => e.Max(), new()
+            var testSubject = new ParallelBlock<int, int, int>(2, e => e.Max(), new()
             {
                 BoundedCapacityMode = GuaranteedBroadcastBlockBoundedCapacityMode.LargestQueue,
                 BoundedCapacity = 2

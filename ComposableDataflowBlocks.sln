@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11217.181 d18.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComposableDataflowBlocks", "Source\ComposableDataflowBlocks\ComposableDataflowBlocks.csproj", "{BCC7FBD5-C262-44AA-AF80-6557D6237DC8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "Tests\UnitTests\UnitTests.csproj", "{463A23A1-D293-46F6-9AD6-E2A1385F17B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BCC7FBD5-C262-44AA-AF80-6557D6237DC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCC7FBD5-C262-44AA-AF80-6557D6237DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCC7FBD5-C262-44AA-AF80-6557D6237DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCC7FBD5-C262-44AA-AF80-6557D6237DC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{463A23A1-D293-46F6-9AD6-E2A1385F17B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{463A23A1-D293-46F6-9AD6-E2A1385F17B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{463A23A1-D293-46F6-9AD6-E2A1385F17B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{463A23A1-D293-46F6-9AD6-E2A1385F17B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AAAA19F6-D591-45D8-9212-CF2106439513}
+	EndGlobalSection
+EndGlobal

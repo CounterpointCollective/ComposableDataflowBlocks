@@ -1,6 +1,6 @@
 using System;
 
-namespace CounterpointCollective
+namespace CounterpointCollective.Utilities
 {
     public sealed class ActionDisposable : IDisposable
     {

@@ -1,9 +1,9 @@
+using CounterpointCollective.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using CounterpointCollective.Utilities;
 
 namespace CounterpointCollective.DataFlow
 {

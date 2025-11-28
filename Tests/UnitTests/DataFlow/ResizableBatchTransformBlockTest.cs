@@ -1,6 +1,5 @@
-using System.Drawing.Text;
-using System.Threading.Tasks.Dataflow;
 using CounterpointCollective.DataFlow;
+using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
 {

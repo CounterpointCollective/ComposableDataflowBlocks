@@ -16,6 +16,7 @@
     <!-- Suppress warnings about missing XML documentation -->
     <NoWarn>$(NoWarn);1591</NoWarn>
     <NoWarn>$(NoWarn);1573</NoWarn>
+    <RootNamespace>CounterpointCollective</RootNamespace>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

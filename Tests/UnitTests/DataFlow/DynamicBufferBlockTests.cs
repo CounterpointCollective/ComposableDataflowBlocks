@@ -3,7 +3,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
 {
-    public class DynamicBufferBlockTest
+    public class DynamicBufferBlockTests
     {
         [Fact]
         public async Task TestDynamicBufferBlock()

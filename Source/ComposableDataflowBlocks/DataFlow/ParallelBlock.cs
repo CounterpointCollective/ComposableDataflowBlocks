@@ -1,12 +1,10 @@
+using CounterpointCollective.DataFlow.Encapsulation;
+using CounterpointCollective.DataFlow.Notifying;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CounterpointCollective.DataFlow.Encapsulation;
-using CounterpointCollective.DataFlow.Internal;
-using CounterpointCollective.DataFlow.Notifying;
 
 namespace CounterpointCollective.DataFlow
 {
@@ -25,7 +23,7 @@ namespace CounterpointCollective.DataFlow
     ///   - worker 2 cannot consume more messages at the moment because it's output side is full
     /// The JoiningTarget will not consume messages until all workers have output available, causing a deadlock.
     /// </summary>
-    public class ParBlock<I, T, O> : AbstractEncapsulatedPropagatorBlock<I, O>
+    public class ParallelBlock<I, T, O> : AbstractEncapsulatedPropagatorBlock<I, O>
     {
         protected override ITargetBlock<I> TargetSide => _boundedPropagatorBlock;
         protected override ISourceBlock<O> SourceSide => _boundedPropagatorBlock;
@@ -53,7 +51,7 @@ namespace CounterpointCollective.DataFlow
         private readonly List<IPropagatorBlock<I, T>> _workers = [];
         private int i; //Index of next worker to hookup
 
-        public ParBlock(
+        public ParallelBlock(
             int degreeOfParallelism,
             Func<T[], O> recombine,
             GuaranteedBroadcastBlockOptions options

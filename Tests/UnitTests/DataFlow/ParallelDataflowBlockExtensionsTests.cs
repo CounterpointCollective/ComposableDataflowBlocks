@@ -1,10 +1,10 @@
-using System.Threading.Tasks.Dataflow;
 using CounterpointCollective.DataFlow;
-using static CounterpointCollective.DataFlow.ParallelityExtensions;
+using System.Threading.Tasks.Dataflow;
+using static CounterpointCollective.DataFlow.ParallelDataflowBlockExtensions;
 
 namespace UnitTests.DataFlow
 {
-    public class ParallelityExtensionsTests
+    public class ParallelDataflowBlockExtensionsTests
     {
         [Fact]
         public async Task ParTest()
@@ -81,7 +81,7 @@ namespace UnitTests.DataFlow
             var task1 = Task.Run(() => worker1);
 
             var b =
-                ParallelityExtensions.CreateAsyncParBuilder<int>()
+                ParallelDataflowBlockExtensions.CreateAsyncParBuilder<int>()
                 .AddBlockFactory(_ => task0)
                 .AddBlockFactory(_ => task1)
                 .Build();
@@ -134,7 +134,7 @@ namespace UnitTests.DataFlow
 
 
             var b =
-                ParallelityExtensions.CreateAsyncParBuilder<int>()
+                ParallelDataflowBlockExtensions.CreateAsyncParBuilder<int>()
                 .AddBlockFactory(_ => task0)
                 .AddBlockFactory(_ =>task1)
                 .Build();
@@ -173,7 +173,7 @@ namespace UnitTests.DataFlow
             using var cts = new CancellationTokenSource();
 
             var b =
-                ParallelityExtensions.CreateAsyncParBuilder<int>()
+                ParallelDataflowBlockExtensions.CreateAsyncParBuilder<int>()
                 .AddBlockFactory(Fac1)
                 .AddBlockFactory(Fac2)
                 .Build(cts.Token);
