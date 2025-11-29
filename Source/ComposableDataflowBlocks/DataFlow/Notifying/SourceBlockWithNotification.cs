@@ -253,7 +253,7 @@ namespace CounterpointCollective.DataFlow.Notifying
                         }
                     } else
                     {
-                        //Source is already busy... We have to postpone.
+                        //We are already making calls into Source... We have to postpone to prevent deadlocks.
                         if (source != null) 
                         {
                             lock (_postponedMessagesManager.IncomingLock)
