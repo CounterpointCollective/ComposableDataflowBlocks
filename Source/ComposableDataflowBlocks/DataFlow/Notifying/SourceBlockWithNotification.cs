@@ -160,7 +160,6 @@ namespace CounterpointCollective.DataFlow.Notifying
 
             private sealed class InspectableLink : ITargetBlock<T>, IDisposable
             {
-                private readonly SourceBlockNotificationHooks<T> _hooks;
                 private readonly Implementation _outer;
                 private readonly ITargetBlock<T> _target;
                 private readonly IDisposable _link;
@@ -210,7 +209,6 @@ namespace CounterpointCollective.DataFlow.Notifying
 
                     _outer = outer;
                     _target = target;
-                    _hooks = outer.Hooks;
 
                     _link = pred == null ? _outer.InnerBlock.LinkTo(this, opts) : _outer.InnerBlock.LinkTo(this, opts, pred);
                     if (opts.PropagateCompletion)
