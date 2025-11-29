@@ -72,7 +72,7 @@ namespace CounterpointCollective.DataFlow
             lock (Lock)
             {
                 //Another thread may have completed concurrently.
-                if (_tcsCompletionRequest.Task.IsCompleted)
+                if (IsCompletionRequested)
                 {
                     return DataflowMessageStatus.DecliningPermanently;
                 }
