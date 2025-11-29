@@ -76,7 +76,7 @@ namespace CounterpointCollective.DataFlow
                 {
                     return DataflowMessageStatus.DecliningPermanently;
                 }
-                //Or we may need to install a buffer.
+                //Or we may need to install a buffer, in case another thread didn't do it concurrently.
                 if (buffer == null)
                 {
                     buffer = new BufferBlock<T>();
