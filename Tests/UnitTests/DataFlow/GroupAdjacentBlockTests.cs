@@ -41,7 +41,7 @@ namespace UnitTests.DataFlow
             input.PostAsserted(1);
             input.PostAsserted(1);
             input.LinkTo(testSubject);
-            await TestToolExtensions.Eventually(() => Assert.Equal(0, input.Count));
+            await TestExtensions.Eventually(() => Assert.Equal(0, input.Count));
 
             cts.Cancel();
             await Task.WhenAny(testSubject.Completion);

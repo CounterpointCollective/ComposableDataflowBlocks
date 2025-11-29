@@ -336,7 +336,7 @@ public class OrderPreservingChoiceBlockTests
 
         testSubject.PostAsserted((true, 1));
             //send it to the then branch
-        await TestToolExtensions.Eventually(() =>
+        await TestExtensions.Eventually(() =>
         {
             Assert.Equal(1, testSubject.ThenBranch.Tokens); //block should be waiting for the then branch to finish.
             Assert.Equal(0, testSubject.Count);  //while the message is parked in the then branch, it should not be counted by the testSubject.
@@ -350,7 +350,7 @@ public class OrderPreservingChoiceBlockTests
         }
         await testSubject.SendAsync((true, 1)); //send one more to the then branch, which is clogged.
 
-        await TestToolExtensions.Eventually(() =>
+        await TestExtensions.Eventually(() =>
         {
             Assert.Equal(1, testSubject.ThenBranch.Tokens); //then branch is still clogged
             Assert.Equal(1, testSubject.InputCount);
@@ -358,7 +358,7 @@ public class OrderPreservingChoiceBlockTests
         });
 
         thenRelease.Release(); //Allow the then branch to process its first message.
-        await TestToolExtensions.Eventually(() =>
+        await TestExtensions.Eventually(() =>
         {
             Assert.Equal(51, testSubject.OutputCount); //first then branch message + 50 else branch messages
             Assert.Equal(1, testSubject.ThenBranch.Tokens); //then branch clogged by second message
