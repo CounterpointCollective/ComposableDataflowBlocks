@@ -1,5 +1,6 @@
 using CounterpointCollective.DataFlow.Encapsulation;
 using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -87,11 +88,7 @@ namespace CounterpointCollective.DataFlow
                         .BuildTargetBlock();
                 }
                 ret = target.OfferMessage(messageHeader, messageValue, source, consumeToAccept);
-                if (ret != DataflowMessageStatus.Accepted)
-                {
-                    //This cannot happen in practice.
-                    throw new InvalidOperationException("Protocol breakdown. Target must always accept unless we are completed");
-                }
+                Debug.Assert(ret == DataflowMessageStatus.Accepted);
                 return ret;
             }
         }
