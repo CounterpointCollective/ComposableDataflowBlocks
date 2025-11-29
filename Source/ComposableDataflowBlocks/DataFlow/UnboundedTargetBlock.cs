@@ -1,5 +1,7 @@
 using CounterpointCollective.DataFlow.Encapsulation;
 using System;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -56,14 +58,27 @@ namespace CounterpointCollective.DataFlow
 
         public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, T messageValue, ISourceBlock<T>? source, bool consumeToAccept)
         {
-            lock(Lock)
+            //Optimistic path: is not completing, first try without locks to feed it to the target.
+            if (IsCompletionRequested)
             {
-                if (_tcsCompletionRequest.Task.IsCompleted)
+                return DataflowMessageStatus.DecliningPermanently;
+            }
+            var ret = target.OfferMessage(messageHeader, messageValue, null, consumeToAccept);
+            if (ret == DataflowMessageStatus.Accepted)
+            {
+                return ret;
+            }
+
+            //Optimistic path failed. Acquire the lock and find out what happened.
+            lock (Lock)
+            {
+                //Another thread may have completed concurrently.
+                if (IsCompletionRequested)
                 {
                     return DataflowMessageStatus.DecliningPermanently;
                 }
-                var ret = target.OfferMessage(messageHeader, messageValue, null, consumeToAccept);
-                if (buffer == null && ret != DataflowMessageStatus.Accepted)
+                //Or we may need to install a buffer, in case another thread didn't do it concurrently.
+                if (buffer == null)
                 {
                     buffer = new BufferBlock<T>();
                     target =
@@ -71,8 +86,9 @@ namespace CounterpointCollective.DataFlow
                         .BeginEncapsulation()
                         .LinkTo(_inner, new DataflowLinkOptions() { PropagateCompletion = true })
                         .BuildTargetBlock();
-                    ret = target.OfferMessage(messageHeader, messageValue, source, consumeToAccept);
                 }
+                ret = target.OfferMessage(messageHeader, messageValue, source, consumeToAccept);
+                Debug.Assert(ret == DataflowMessageStatus.Accepted);
                 return ret;
             }
         }

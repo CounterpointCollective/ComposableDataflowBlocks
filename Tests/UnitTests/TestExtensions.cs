@@ -1,9 +1,23 @@
 using System.Diagnostics;
+using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests
 {
-    public static class TestToolExtensions
+    public static class TestExtensions
     {
+        public static async Task TestCancellationAsync(
+            this IDataflowBlock testSubject,
+            CancellationTokenSource cts
+        )
+        {
+            cts.Cancel();
+            try
+            {
+                await testSubject.Completion;
+            }
+            catch (OperationCanceledException) { }
+            Assert.True(testSubject.Completion.IsCanceled);
+        }
         public static Task Eventually(this Action a, int timeoutInMs = 5000, int interval = 10)
             =>
             new Func<Task>(() =>

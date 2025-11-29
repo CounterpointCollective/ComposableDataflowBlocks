@@ -3,12 +3,12 @@ using System.Threading.Tasks.Dataflow;
 
 namespace UnitTests.DataFlow
 {
-    public class DynamicBufferBlockTests
+    public class ResizableBufferBlockTests
     {
         [Fact]
-        public async Task TestDynamicBufferBlock()
+        public async Task TestResizableBufferBlock()
         {
-            var b = new DynamicBufferBlock<int>(new() { BoundedCapacity = 1 });
+            var b = new ResizableBufferBlock<int>(new() { BoundedCapacity = 1 });
             Assert.True(b.Post(1));
             Assert.False(b.Post(2));
 
@@ -33,11 +33,11 @@ namespace UnitTests.DataFlow
         }
 
         [Fact]
-        public async Task TestDynamicBufferBlockPicksUpPostponedMessages()
+        public async Task TestResizableBufferBlockPicksUpPostponedMessages()
         {
             var input = new BufferBlock<int>();
 
-            var testSubject = new DynamicBufferBlock<int>(new() { BoundedCapacity = 1 });
+            var testSubject = new ResizableBufferBlock<int>(new() { BoundedCapacity = 1 });
             input.LinkTo(testSubject, new DataflowLinkOptions { PropagateCompletion = true });
             input.Post(1);
             input.Post(2);
@@ -55,7 +55,7 @@ namespace UnitTests.DataFlow
         [Fact]
         public void UnboundedNeverPostpones()
         {
-            var testSubject = new DynamicBufferBlock<int>(new() { BoundedCapacity = -1 });
+            var testSubject = new ResizableBufferBlock<int>(new() { BoundedCapacity = -1 });
             testSubject.LinkTo(new BufferBlock<int>(new DataflowBlockOptions { BoundedCapacity = 10 }));
             for (var i = 0; i < 1000; i++)
             {
@@ -67,14 +67,14 @@ namespace UnitTests.DataFlow
         public async Task SupportsCancellation()
         {
             var cts = new CancellationTokenSource();
-            var testSubject = new DynamicBufferBlock<int>(new() { CancellationToken = cts.Token });
+            var testSubject = new ResizableBufferBlock<int>(new() { CancellationToken = cts.Token });
             await testSubject.TestCancellationAsync(cts);
         }
 
         [Fact]
         public async Task CheckCount()
         {
-            var testSubject = new DynamicBufferBlock<int>(new());
+            var testSubject = new ResizableBufferBlock<int>(new());
             var c = 0;
             var r = new Random();
             for (var i = 0; i < 100; i++)
@@ -101,7 +101,7 @@ namespace UnitTests.DataFlow
         [Fact]
         public async Task CheckCountAsynchronously()
         {
-            var testSubject = new DynamicBufferBlock<int>(new() { BoundedCapacity = 25 });
+            var testSubject = new ResizableBufferBlock<int>(new() { BoundedCapacity = 25 });
             var c = 0;
             var r = new Random();
             for (var i = 0; i < 100; i++)

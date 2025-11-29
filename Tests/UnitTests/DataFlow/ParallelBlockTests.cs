@@ -20,7 +20,7 @@ namespace UnitTests.DataFlow
             b.PostAsserted(101);
             b.PostAsserted(102);
             b.PostAsserted(103);
-            await TestToolExtensions.Eventually(() =>
+            await TestExtensions.Eventually(() =>
             {
                 Assert.Equal(2, testSubject.InputCount);
                 Assert.Equal(2, testSubject.Count);
@@ -30,10 +30,10 @@ namespace UnitTests.DataFlow
             var worker1 = new TransformBlock<int,int>(e => e + 1);
 
             testSubject.Hookup(worker1, new ());
-            await TestToolExtensions.Eventually(() => Assert.Equal(0, testSubject.InputCount));
+            await TestExtensions.Eventually(() => Assert.Equal(0, testSubject.InputCount));
 
             testSubject.Hookup(new BufferBlock<int>(), new());
-            await TestToolExtensions.Eventually(() => Assert.Equal(3, testSubject.OutputCount));
+            await TestExtensions.Eventually(() => Assert.Equal(3, testSubject.OutputCount));
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace UnitTests.DataFlow
             Assert.True(source.Post(102));
             Assert.True(source.Post(103));
 
-            await TestToolExtensions.Eventually(() =>
+            await TestExtensions.Eventually(() =>
             {
                 Assert.Equal(2, testSubject.InputCount);
                 Assert.Equal(1, source.Count);
@@ -62,7 +62,7 @@ namespace UnitTests.DataFlow
 
             testSubject.Hookup(worker1, new());
 
-            await TestToolExtensions.Eventually(() => Assert.Equal(2, worker1.OutputCount)); //it should already start delivering messages
+            await UnitTests.TestExtensions.Eventually(() => Assert.Equal(2, worker1.OutputCount)); //it should already start delivering messages
 
             Assert.Equal(2, testSubject.InputCount); //because we count the largest queue
             Assert.Equal(1, source.Count);
@@ -74,7 +74,7 @@ namespace UnitTests.DataFlow
                 return i;
             }, new() { BoundedCapacity = 1 });
             testSubject.Hookup(worker2, new()); //worker2 will absorb the first message from queue[1].
-            await TestToolExtensions.Eventually(() =>
+            await TestExtensions.Eventually(() =>
             {
                 Assert.Equal(0, source.Count); //since both queues have now delivered items, a second item should fit into the broadcast.
                 Assert.Equal(3, worker1.OutputCount);
@@ -84,7 +84,7 @@ namespace UnitTests.DataFlow
             });
 
             tcs.SetResult(); //alow worker2 to process messages.
-            await TestToolExtensions.Eventually(() =>
+            await TestExtensions.Eventually(() =>
             {
                 Assert.Equal(0, testSubject.InputCount);
                 Assert.Equal(3, testSubject.OutputCount);

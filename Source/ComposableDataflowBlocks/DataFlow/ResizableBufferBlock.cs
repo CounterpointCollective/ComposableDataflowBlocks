@@ -4,11 +4,11 @@ using System.Threading.Tasks.Dataflow;
 
 namespace CounterpointCollective.DataFlow
 {
-    public sealed class DynamicBufferBlock<T> : AbstractEncapsulatedPropagatorBlock<T, T>
+    public sealed class ResizableBufferBlock<T> : AbstractEncapsulatedPropagatorBlock<T, T>
     {
         private readonly BoundedPropagatorBlock<T,T> _inner;
 
-        public DynamicBufferBlock(DataflowBlockOptions options, Action? onEntered = null) =>
+        public ResizableBufferBlock(DataflowBlockOptions options, Action? onEntered = null) =>
             _inner = new(new BufferBlock<T>(new() { CancellationToken = options.CancellationToken }), options.BoundedCapacity, onEntered);
 
         protected override ITargetBlock<T> TargetSide => _inner;

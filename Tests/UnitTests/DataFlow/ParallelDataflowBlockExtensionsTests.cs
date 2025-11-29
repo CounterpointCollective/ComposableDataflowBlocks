@@ -89,7 +89,7 @@ namespace UnitTests.DataFlow
             await b.SendAsync(101);
 
             //worker1 should already be working while worker0 is still being set up
-            await TestToolExtensions.Eventually(() =>
+            await TestExtensions.Eventually(() =>
             {
                 Assert.False(task0.IsCompleted);
                 Assert.Equal(1, worker1.OutputCount);
@@ -97,7 +97,7 @@ namespace UnitTests.DataFlow
 
             tcsContinueTask0.SetResult();
 
-            await TestToolExtensions.Eventually(() =>
+            await TestExtensions.Eventually(() =>
             {
                 Assert.Equal(0, worker0.OutputCount);
                 Assert.Equal(0, worker1.OutputCount);
@@ -142,7 +142,7 @@ namespace UnitTests.DataFlow
             await b.SendAsync(101);
 
             //worker1 should already be working while worker0 is still being set up
-            await TestToolExtensions.Eventually(() =>
+            await TestExtensions.Eventually(() =>
             {
                 Assert.False(task0.IsCompleted);
                 Assert.Equal(1, worker1.OutputCount);
@@ -179,7 +179,7 @@ namespace UnitTests.DataFlow
                 .Build(cts.Token);
 
             await b.SendAsync(101);
-            await TestToolExtensions.Eventually(() => Assert.Equal(1, worker1.OutputCount));
+            await TestExtensions.Eventually(() => Assert.Equal(1, worker1.OutputCount));
 
             cts.Cancel();
             await Task.WhenAny(b.Completion);

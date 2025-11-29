@@ -1,7 +1,9 @@
 using CounterpointCollective.DataFlow.Encapsulation;
+using CounterpointCollective.DataFlow.Internal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -47,7 +49,7 @@ namespace CounterpointCollective.DataFlow.Notifying
 
         private class Implementation: IReceivableSourceBlock<T>
         {
-            private object Lock { get; } = new();
+            private object SynchronousOfferLock { get; } = new();
 
             private ISourceBlock<T> InnerBlock { get; }
 
@@ -57,11 +59,11 @@ namespace CounterpointCollective.DataFlow.Notifying
 
             public void AddHooks(ConfigureHooks<T> c) => Hooks.Add(c);
 
+
             public Implementation(ISourceBlock<T> innerBlock)
             {
                 InnerBlock = innerBlock;
                 Hooks = new(this);
-
                 Task.Run(async () =>
                 {
                     await Task.WhenAny(InnerBlock.Completion);
@@ -81,7 +83,7 @@ namespace CounterpointCollective.DataFlow.Notifying
 
             public T? ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<T> target, out bool messageConsumed)
             {
-                lock (Lock)
+                lock (SynchronousOfferLock)
                 {
                     var ret = InnerBlock.ConsumeMessage(messageHeader, target, out messageConsumed);
                     if (messageConsumed)
@@ -96,7 +98,7 @@ namespace CounterpointCollective.DataFlow.Notifying
 
             public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<T> target)
             {
-                lock (Lock)
+                lock (SynchronousOfferLock)
                 {
                     InnerBlock.ReleaseReservation(messageHeader, target);
                     Hooks.OnReservationReleased?.Invoke(new ReservationReleasedEvent());
@@ -111,7 +113,7 @@ namespace CounterpointCollective.DataFlow.Notifying
             {
                 if (InnerBlock is IReceivableSourceBlock<T> r)
                 {
-                    lock (Lock)
+                    lock (SynchronousOfferLock)
                     {
                         var res = r.TryReceive(filter, out item);
                         if (res)
@@ -132,7 +134,7 @@ namespace CounterpointCollective.DataFlow.Notifying
             {
                 if (InnerBlock is IReceivableSourceBlock<T> r)
                 {
-                    lock (Lock)
+                    lock (SynchronousOfferLock)
                     {
                         var res = r.TryReceiveAll(out items);
                         if (res)
@@ -151,18 +153,26 @@ namespace CounterpointCollective.DataFlow.Notifying
 
             public void DispatchPendingEvents()
             {
-                lock (Lock)
+                lock (SynchronousOfferLock)
                 {
                 }
             }
 
             private sealed class InspectableLink : ITargetBlock<T>, IDisposable
             {
-                private readonly SourceBlockNotificationHooks<T> _hooks;
                 private readonly Implementation _outer;
                 private readonly ITargetBlock<T> _target;
                 private readonly IDisposable _link;
                 private readonly TaskCompletionSource _tcsDisposed = new();
+
+                private record Postponed(
+                    ISourceBlock<T> Source,
+                    DataflowMessageHeader MessageHeader,
+                    T MessageValue
+                );
+
+                private Postponed? lastPostponed;
+                private readonly PostponedMessagesManager<InspectableLink, T> _postponedMessagesManager;
 
                 public InspectableLink(
                     Implementation outer,
@@ -171,9 +181,34 @@ namespace CounterpointCollective.DataFlow.Notifying
                     Predicate<T>? pred = null
                 )
                 {
+                    _postponedMessagesManager = new(
+                        (out PostponedMessage<InspectableLink, T> p) => {
+                            p = default;
+
+                            if (lastPostponed != null)
+                            {
+                                return true;
+                            } else
+                            {
+                                return false;
+                            }
+                        }
+                    );
+
+                    _postponedMessagesManager.Consume = (in p) =>
+                    {
+                        if (lastPostponed != null)
+                        {
+                            lock (outer.SynchronousOfferLock)
+                            {
+                                OfferMessage(lastPostponed.MessageHeader, lastPostponed.MessageValue, lastPostponed.Source, true);
+                            }
+                            lastPostponed = null;
+                        }
+                    };
+
                     _outer = outer;
                     _target = target;
-                    _hooks = outer.Hooks;
 
                     _link = pred == null ? _outer.InnerBlock.LinkTo(this, opts) : _outer.InnerBlock.LinkTo(this, opts, pred);
                     if (opts.PropagateCompletion)
@@ -198,14 +233,39 @@ namespace CounterpointCollective.DataFlow.Notifying
                     bool consumeToAccept
                 )
                 {
-                    lock (_outer.Lock)
+                    if (Monitor.TryEnter(_outer.SynchronousOfferLock))
                     {
-                        var res = _target.OfferMessage(messageHeader, messageValue, _outer, consumeToAccept);
-                        if (!consumeToAccept && _outer.Hooks.OnDeliveringMessages != null && res == DataflowMessageStatus.Accepted)
+                        try
                         {
-                            _outer.Hooks.OnDeliveringMessages(new DeliveringMessagesEvent(1));
+                            lock (_postponedMessagesManager.IncomingLock)
+                            {
+                                lastPostponed = null;
+                            }
+                            var res = _target.OfferMessage(messageHeader, messageValue, _outer, consumeToAccept);
+                            if (!consumeToAccept && _outer.Hooks.OnDeliveringMessages != null && res == DataflowMessageStatus.Accepted)
+                            {
+                                _outer.Hooks.OnDeliveringMessages(new DeliveringMessagesEvent(1));
+                            }
+                            return res;
+                        } finally
+                        {
+                            Monitor.Exit(_outer.SynchronousOfferLock);
                         }
-                        return res;
+                    } else
+                    {
+                        //We are already making calls into Source from another thread... We have to postpone to prevent deadlocks.
+                        if (source != null) 
+                        {
+                            lock (_postponedMessagesManager.IncomingLock)
+                            {
+                                lastPostponed = new(source, messageHeader, messageValue);
+                            }
+                            _postponedMessagesManager.ProcessPostponedMessages();
+                            return DataflowMessageStatus.Postponed;
+                        } else
+                        {
+                            return DataflowMessageStatus.Declined;
+                        }
                     }
                 }
 

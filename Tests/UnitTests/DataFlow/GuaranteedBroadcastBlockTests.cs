@@ -95,14 +95,14 @@ namespace UnitTests.DataFlow
 
             //read from slowest target
             o1.Receive();
-            await TestToolExtensions.Eventually(() => Assert.Equal(1, o1.Count));
+            await UnitTests.TestExtensions.Eventually(() => Assert.Equal(1, o1.Count));
             Assert.Equal(2, testSubject.Count);
 
             Assert.False(testSubject.Post(1));
 
             //read from fastest target
             o2.Receive();
-            await TestToolExtensions.Eventually(() => Assert.Equal(2, o2.Count));
+            await TestExtensions.Eventually(() => Assert.Equal(2, o2.Count));
             Assert.Equal(1, testSubject.Count);
 
 
@@ -136,7 +136,7 @@ namespace UnitTests.DataFlow
             await testSubject.SendAsync(101);
             await testSubject.SendAsync(102);
 
-            await TestToolExtensions.Eventually(() => Assert.Equal(2, t0.Count));
+            await TestExtensions.Eventually(() => Assert.Equal(2, t0.Count));
             Assert.Equal(2, testSubject.Count);
 
             Assert.False(testSubject.Post(103)); //because max queue is full.

@@ -15,7 +15,7 @@ namespace UnitTests.DataFlow
 
             testSubject.PostAsserted(1);
             testSubject.PostAsserted(2);
-            await TestToolExtensions.Eventually(() => Assert.Equal(2, testSubject.OutputCount));
+            await TestExtensions.Eventually(() => Assert.Equal(2, testSubject.OutputCount));
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace UnitTests.DataFlow
 
             testSubject.PostAsserted(2);
 
-            await TestToolExtensions.Eventually(() =>
+            await UnitTests.TestExtensions.Eventually(() =>
             {
                 Assert.Equal(2, testSubject.Count);
                 Assert.Equal(0, testSubject.OutputCount);
@@ -44,7 +44,7 @@ namespace UnitTests.DataFlow
             });
             tcs.SetResult();
 
-            await TestToolExtensions.Eventually(() => {
+            await TestExtensions.Eventually(() => {
                 Assert.Equal(2, testSubject.OutputCount);
                 Assert.Equal(2, testSubject.Count);
                 Assert.Equal(0, testSubject.InputCount);

@@ -114,13 +114,13 @@ namespace UnitTests.DataFlow.Notifying
             {
                 Assert.False(b.Completion.IsCompleted);
                 are.Set(); //Unblock the first delivery
-                await TestToolExtensions.Eventually(() => Assert.True(i > prevI));
+                await UnitTests.TestExtensions.Eventually(() => Assert.True(i > prevI));
                 prevI = i;
                 numberOfBatches++;
             }
             Assert.True(numberOfBatches <= 2); //we expect the clogging to make the delivery system batch up events.
             await b.Completion;
-            await TestToolExtensions.Eventually(() => Assert.Equal(1000, i));
+            await TestExtensions.Eventually(() => Assert.Equal(1000, i));
         }
     }
 }
